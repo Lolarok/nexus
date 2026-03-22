@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS — AI & Vibe Coding Intelligence</title>
+<style>
+  :root {
+    --bg: #09090b;
+    --surface: #111113;
+    --surface2: #18181b;
+    --surface3: #1f1f23;
+    --border: #27272a;
+    --border-light: #3f3f46;
+    --text: #fafafa;
+    --text2: #a1a1aa;
+    --text3: #71717a;
+    --accent: #7c3aed;
+    --accent-light: #a78bfa;
+    --accent2: #06b6d4;
+    --green: #22c55e;
+    --red: #ef4444;
+    --orange: #f97316;
+    --yellow: #eab308;
+    --pink: #ec4899;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ─── Layout ─────────────────────────────── */
+  .app {
+    display: grid;
+    grid-template-columns: 220px 1fr 300px;
+    grid-template-rows: 56px 1fr;
+    height: 100vh;
+    overflow: hidden;
+  }
+  @media (max-width: 1024px) {
+    .app {
+      grid-template-columns: 1fr;
+      grid-template-rows: 56px auto 1fr;
+    }
+    .sidebar, .right-panel { display: none; }
+    .sidebar.mobile-open, .right-panel.mobile-open {
+      display: block; position: fixed; top: 56px; bottom: 0;
+      width: 280px; z-index: 100; background: var(--surface);
+      border-right: 1px solid var(--border); overflow-y: auto;
+    }
+    .sidebar.mobile-open { left: 0; }
+    .right-panel.mobile-open { right: 0; border-right: none; border-left: 1px solid var(--border); }
+  }
+
+  /* ─── Top Bar ─────────────────────────────── */
+  .topbar {
+    grid-column: 1 / -1;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+    z-index: 10;
+  }
+  .topbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 200px;
+  }
+  .topbar-logo .icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .topbar-logo h1 {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--accent-light), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .topbar-logo .version {
+    font-size: 9px;
+    color: var(--text3);
+    background: var(--surface3);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .search-global {
+    flex: 1;
+    max-width: 500px;
+    position: relative;
+  }
+  .search-global input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px 8px 36px;
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-global input:focus { border-color: var(--accent); }
+  .search-global .icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text3);
+    font-size: 14px;
+  }
+  .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .badge {
+    font-size: 10px;
+    background: var(--accent);
+    color: white;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .status-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text3);
+  }
+  .status-chip .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+  .menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text2);
+    font-size: 20px;
+    cursor: pointer;
+  }
+  @media (max-width: 1024px) {
+    .menu-btn { display: block; }
+    .topbar-logo { min-width: auto; }
+    .topbar-logo .version { display: none; }
+  }
+
+  /* ─── Sidebar ─────────────────────────────── */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 16px 0;
+    overflow-y: auto;
+  }
+  .sidebar-section {
+    padding: 0 12px;
+    margin-bottom: 20px;
+  }
+  .sidebar-section h3 {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text3);
+    padding: 0 8px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active {
+    background: rgba(124,58,237,0.15);
+    color: var(--accent-light);
+  }
+  .nav-item .count {
+    margin-left: auto;
+    font-size: 10px;
+    background: var(--surface3);
+    padding: 1px 6px;
+    border-radius: 8px;
+    color: var(--text3);
+  }
+  .nav-item.active .count {
+    background: rgba(124,58,237,0.3);
+    color: var(--accent-light);
+  }
+
+  /* ─── Main Feed ─────────────────────────────── */
+  .main {
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .feed-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .feed-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .feed-controls {
+    display: flex;
+    gap: 6px;
+  }
+  .feed-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text3);
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .feed-btn:hover { border-color: var(--accent); color: var(--text); }
+  .feed-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+  /* ─── Article Cards ─────────────────────── */
+  .article {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .article::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .article:hover {
+    border-color: var(--border-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .article:hover::before { opacity: 1; }
+  .article.meta-highlight { border-color: var(--accent); }
+  .article.meta-highlight::before { opacity: 1; background: var(--pink); }
+
+  .article-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .source-tag {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .source-tag.hn { background: rgba(255,102,0,0.15); color: #ff6600; }
+  .source-tag.devto { background: rgba(0,0,0,0.3); color: #fff; border: 1px solid var(--border); }
+  .source-tag.arxiv { background: rgba(0,150,136,0.15); color: #009688; }
+  .source-tag.lobsters { background: rgba(183,28,28,0.15); color: #ef5350; }
+  .source-tag.github { background: rgba(36,41,46,0.5); color: #8b949e; border: 1px solid #30363d; }
+  .source-tag.reddit { background: rgba(255,69,0,0.15); color: #ff4500; }
+
+  .article-date {
+    font-size: 10px;
+    color: var(--text3);
+    margin-left: auto;
+  }
+  .article-title {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .article:hover .article-title { color: var(--accent-light); }
+  .article-desc {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.5;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 11px;
+    color: var(--text3);
+    flex-wrap: wrap;
+  }
+  .article-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .tag-list {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    font-size: 10px;
+    background: var(--surface3);
+    color: var(--text3);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .tag.ai { background: rgba(124,58,237,0.15); color: var(--accent-light); }
+  .tag.vibe { background: rgba(6,182,212,0.15); color: var(--accent2); }
+  .tag.hot { background: rgba(239,68,68,0.15); color: var(--red); }
+
+  /* ─── Right Panel ─────────────────────────── */
+  .right-panel {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    padding: 16px;
+    overflow-y: auto;
+  }
+  .panel-section {
+    margin-bottom: 24px;
+  }
+  .panel-section h3 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text3);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .trending-item {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .trending-item:last-child { border: none; }
+  .trending-item .title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .trending-item:hover .title { color: var(--accent-light); }
+  .trending-item .meta {
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 3px;
+  }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 12px;
+  }
+  .stat-row .label { color: var(--text3); }
+  .stat-row .value { font-weight: 600; }
+  .keyword-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .keyword {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: var(--surface3);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .keyword:hover { background: var(--accent); color: white; }
+
+  /* ─── Loading / Empty ─────────────────────── */
+  .loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 60px;
+    gap: 16px;
+  }
+  .loader-bar {
+    width: 200px;
+    height: 3px;
+    background: var(--surface3);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .loader-bar .fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    animation: load 1.5s ease-in-out infinite;
+  }
+  @keyframes load {
+    0% { width: 0; margin-left: 0; }
+    50% { width: 60%; margin-left: 20%; }
+    100% { width: 0; margin-left: 100%; }
+  }
+  .loader p {
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  /* ─── Keyword Alert Banner ────────────────── */
+  .alert-banner {
+    background: rgba(124,58,237,0.1);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 12px;
+    color: var(--accent-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .alert-banner .dismiss {
+    margin-left: auto;
+    cursor: pointer;
+    opacity: 0.6;
+  }
+  .alert-banner .dismiss:hover { opacity: 1; }
+
+  /* ─── Scrollbar ─────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Top Bar -->
+  <div class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="topbar-logo">
+      <div class="icon">🔮</div>
+      <div>
+        <h1>NEXUS</h1>
+      </div>
+      <span class="version">v2.0</span>
+    </div>
+    <div class="search-global">
+      <span class="icon">⌕</span>
+      <input type="text" id="globalSearch" placeholder="Search all sources... (⌘K)" oninput="handleSearch(this.value)">
+    </div>
+    <div class="topbar-actions">
+      <span class="badge" id="articleCount">0</span>
+      <div class="status-chip">
+        <div class="dot" id="statusDot"></div>
+        <span id="statusText">Initializing...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <h3>Sources</h3>
+      <div class="nav-item active" data-source="all" onclick="setSource('all', this)">
+        <span>🌐</span> All Sources <span class="count" id="count-all">0</span>
+      </div>
+      <div class="nav-item" data-source="hn" onclick="setSource('hn', this)">
+        <span>🔶</span> Hacker News <span class="count" id="count-hn">0</span>
+      </div>
+      <div class="nav-item" data-source="devto" onclick="setSource('devto', this)">
+        <span>📝</span> Dev.to <span class="count" id="count-devto">0</span>
+      </div>
+      <div class="nav-item" data-source="arxiv" onclick="setSource('arxiv', this)">
+        <span>📄</span> arXiv Papers <span class="count" id="count-arxiv">0</span>
+      </div>
+      <div class="nav-item" data-source="lobsters" onclick="setSource('lobsters', this)">
+        <span>🦞</span> Lobsters <span class="count" id="count-lobsters">0</span>
+      </div>
+      <div class="nav-item" data-source="github" onclick="setSource('github', this)">
+        <span>🐙</span> GitHub Trending <span class="count" id="count-github">0</span>
+      </div>
+      <div class="nav-item" data-source="reddit" onclick="setSource('reddit', this)">
+        <span>🤖</span> Reddit <span class="count" id="count-reddit">0</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <h3>Topics</h3>
+      <div class="nav-item" data-source="topic-ai" onclick="setSource('topic-ai', this)">
+        <span>🧠</span> AI / LLMs <span class="count" id="count-topic-ai">0</span>
+      </div>
+      <div class="nav-item" data-source="topic-vibe" onclick="setSource('topic-vibe', this)">
+        <span>✨</span> Vibe Coding <span class="count" id="count-topic-vibe">0</span>
+      </div>
+      <div class="nav-item" data-source="topic-agents" onclick="setSource('topic-agents', this)">
+        <span>🤖</span> AI Agents <span class="count" id="count-topic-agents">0</span>
+      </div>
+      <div class="nav-item" data-source="topic-tools" onclick="setSource('topic-tools', this)">
+        <span>🛠️</span> Tools & Dev <span class="count" id="count-topic-tools">0</span>
+      </div>
+      <div class="nav-item" data-source="topic-models" onclick="setSource('topic-models', this)">
+        <span>⚡</span> New Models <span class="count" id="count-topic-models">0</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <h3>Quick Filters</h3>
+      <div class="nav-item" onclick="setSort('hot')">
+        <span>🔥</span> Hot Right Now
+      </div>
+      <div class="nav-item" onclick="setSort('recent')">
+        <span>🕐</span> Most Recent
+      </div>
+      <div class="nav-item" onclick="setSort('discussed')">
+        <span>💬</span> Most Discussed
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Feed -->
+  <div class="main" id="mainFeed">
+    <div class="feed-header">
+      <h2 id="feedTitle">All Sources</h2>
+      <div class="feed-controls">
+        <button class="feed-btn active" onclick="setSort('hot', this)">🔥 Hot</button>
+        <button class="feed-btn" onclick="setSort('recent', this)">🕐 New</button>
+        <button class="feed-btn" onclick="setSort('discussed', this)">💬 Top</button>
+        <button class="feed-btn" onclick="refreshAll()">↻ Refresh</button>
+      </div>
+    </div>
+    <div id="alertBanner"></div>
+    <div id="feedContent">
+      <div class="loader">
+        <div class="loader-bar"><div class="fill"></div></div>
+        <p>Aggregating from 6 sources...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="right-panel" id="rightPanel">
+    <div class="panel-section">
+      <h3>📊 Live Stats</h3>
+      <div class="stat-row">
+        <span class="label">Total Articles</span>
+        <span class="value" id="stat-total">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">AI Related</span>
+        <span class="value" id="stat-ai">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Vibe Coding</span>
+        <span class="value" id="stat-vibe">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Sources Active</span>
+        <span class="value" id="stat-sources">0/6</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Last Updated</span>
+        <span class="value" id="stat-updated">--</span>
+      </div>
+    </div>
+    <div class="panel-section">
+      <h3>🔥 Trending Now</h3>
+      <div id="trendingList"></div>
+    </div>
+    <div class="panel-section">
+      <h3>🏷️ Hot Keywords</h3>
+      <div class="keyword-cloud" id="keywordCloud"></div>
+    </div>
+    <div class="panel-section">
+      <h3>⚡ Alerts</h3>
+      <div id="alertsList" style="font-size:12px;color:var(--text3);">No keyword alerts set. Articles matching your interests will appear highlighted.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  NEXUS v2.0 — AI & Vibe Coding Intelligence Aggregator
+//  Multi-source, categorized, searchable, zero-dependency
+// ═══════════════════════════════════════════════════════════════════
+
+// ─── Config ────────────────────────────────────────────
+const REFRESH_MS = 120_000; // 2 min
+const RETRY = 2;
+const RETRY_DELAY = 2000;
+
+// ─── State ─────────────────────────────────────────────
+const state = {
+  articles: [],
+  source: 'all',
+  sort: 'hot',
+  search: '',
+  sourcesLoaded: 0,
+  sourcesTotal: 6,
+};
+
+// ─── Topic Classification Engine ───────────────────────
+const TOPICS = {
+  ai: {
+    keywords: ['llm', 'gpt', 'claude', 'gemini', 'openai', 'anthropic', 'mistral', 'llama', 'transformer', 'neural', 'deep learning', 'machine learning', 'ai model', 'artificial intelligence', 'chatgpt', 'copilot', 'embedding', 'rag', 'fine-tun', 'lora', 'diffusion', 'stable diffusion', 'midjourney', 'generative ai', 'agi', 'reasoning', 'multimodal', 'vision model'],
+    label: 'AI',
+    icon: '🧠',
+  },
+  vibe: {
+    keywords: ['vibe coding', 'cursor', 'copilot', 'windsurf', 'bolt.new', 'lovable', 'v0.dev', 'replit agent', 'devin', 'ai coding', 'code generation', 'ai pair', 'ai-assisted', 'coding agent', 'agentic coding', 'llm code', 'ai dev', 'no-code', 'low-code', 'prompt engineering', 'codex', 'claude code', 'kilocode', 'kilo code'],
+    label: 'Vibe Coding',
+    icon: '✨',
+  },
+  agents: {
+    keywords: ['ai agent', 'agentic', 'multi-agent', 'tool use', 'function calling', 'mcp', 'model context protocol', 'a]gent framework', 'autonomous agent', 'agent workflow', 'langchain', 'langgraph', 'crewai', 'autogen', 'openai agent', 'claude agent', 'agent sdk'],
+    label: 'Agents',
+    icon: '🤖',
+  },
+  tools: {
+    keywords: ['cli', 'framework', 'library', 'sdk', 'api', 'developer tool', 'devtool', 'open source', 'github', 'npm', 'package', 'rust', 'go', 'python', 'typescript', 'editor', 'ide', 'extension', 'plugin'],
+    label: 'Tools',
+    icon: '🛠️',
+  },
+  models: {
+    keywords: ['new model', 'release', 'benchmark', 'state-of-the-art', 'sota', 'open source model', 'weight', 'parameter', 'billion', 'performance', 'training', 'pre-training', 'post-training', 'alignment', 'rlhf', 'dpo', 'grpo', 'reasoning model'],
+    label: 'Models',
+    icon: '⚡',
+  },
+};
+
+function classify(text) {
+  const lower = text.toLowerCase();
+  const tags = [];
+  for (const [key, topic] of Object.entries(TOPICS)) {
+    if (topic.keywords.some(kw => lower.includes(kw))) {
+      tags.push({ key, label: topic.label, icon: topic.icon });
+    }
+  }
+  return tags;
+}
+
+function isAIRelated(article) {
+  const text = `${article.title} ${article.desc}`.toLowerCase();
+  return TOPICS.ai.keywords.some(kw => text.includes(kw)) ||
+         TOPICS.vibe.keywords.some(kw => text.includes(kw)) ||
+         TOPICS.agents.keywords.some(kw => text.includes(kw));
+}
+
+// ─── HTTP Layer ────────────────────────────────────────
+async function fetchJSON(url, retries = RETRY) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      if (res.status === 429) { await sleep(RETRY_DELAY * (i+1)); continue; }
+      if (!res.ok) throw new Error(`${res.status}`);
+      return await res.json();
+    } catch (e) {
+      if (i === retries - 1) throw e;
+      await sleep(1000 * (i+1));
+    }
+  }
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ─── Source Fetchers ───────────────────────────────────
+async function fetchHN() {
+  try {
+    const ids = await fetchJSON('https://hacker-news.firebaseio.com/v0/topstories.json');
+    const top = ids.slice(0, 30);
+    const items = await Promise.all(top.map(id =>
+      fetchJSON(`https://hacker-news.firebaseio.com/v0/item/${id}.json`).catch(() => null)
+    ));
+    return items.filter(Boolean).map(item => ({
+      source: 'hn',
+      title: item.title || '',
+      desc: '',
+      url: item.url || `https://news.ycombinator.com/item?id=${item.id}`,
+      comments: `https://news.ycombinator.com/item?id=${item.id}`,
+      score: item.score || 0,
+      commentsCount: item.descendants || 0,
+      author: item.by || '',
+      date: new Date((item.time || 0) * 1000),
+      ts: (item.time || 0) * 1000,
+    }));
+  } catch (e) { console.error('HN:', e); return []; }
+}
+
+async function fetchDevTo() {
+  try {
+    const articles = await fetchJSON('https://dev.to/api/articles?top=7&tag=ai&per_page=20');
+    return articles.map(a => ({
+      source: 'devto',
+      title: a.title,
+      desc: a.description || '',
+      url: a.url,
+      score: a.positive_reactions_count || 0,
+      commentsCount: a.comments_count || 0,
+      author: a.user?.name || '',
+      date: new Date(a.published_at),
+      ts: new Date(a.published_at).getTime(),
+      tags: a.tag_list || [],
+    }));
+  } catch (e) { console.error('DevTo:', e); return []; }
+}
+
+async function fetchArxiv() {
+  try {
+    // Search for recent AI papers
+    const query = encodeURIComponent('cat:cs.AI OR cat:cs.CL OR cat:cs.LG');
+    const url = `https://export.arxiv.org/api/query?search_query=${query}&sortBy=submittedDate&sortOrder=descending&max_results=15`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    const text = await res.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, 'text/xml');
+    const entries = xml.querySelectorAll('entry');
+    return Array.from(entries).map(entry => {
+      const title = entry.querySelector('title')?.textContent?.replace(/\s+/g, ' ').trim() || '';
+      const summary = entry.querySelector('summary')?.textContent?.replace(/\s+/g, ' ').trim() || '';
+      const link = entry.querySelector('link[rel="alternate"]')?.getAttribute('href') || '';
+      const published = entry.querySelector('published')?.textContent || '';
+      const authors = Array.from(entry.querySelectorAll('author name')).map(n => n.textContent).join(', ');
+      return {
+        source: 'arxiv',
+        title,
+        desc: summary,
+        url: link,
+        score: 0,
+        commentsCount: 0,
+        author: authors,
+        date: new Date(published),
+        ts: new Date(published).getTime(),
+      };
+    });
+  } catch (e) { console.error('Arxiv:', e); return []; }
+}
+
+async function fetchLobsters() {
+  try {
+    const items = await fetchJSON('https://lobste.rs/hottest.json');
+    return items.map(item => ({
+      source: 'lobsters',
+      title: item.title,
+      desc: item.description || '',
+      url: item.url || item.comments_url,
+      comments: item.comments_url,
+      score: item.score || 0,
+      commentsCount: item.comment_count || 0,
+      author: item.submitter_user?.username || '',
+      date: new Date(item.created_at),
+      ts: new Date(item.created_at).getTime(),
+      tags: item.tags || [],
+    }));
+  } catch (e) { console.error('Lobsters:', e); return []; }
+}
+
+async function fetchGitHubTrending() {
+  try {
+    // Use GitHub search for trending AI repos created in last week
+    const since = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
+    const url = `https://api.github.com/search/repositories?q=created:>${since}+topic:ai+topic:llm&sort=stars&order=desc&per_page=15`;
+    const data = await fetchJSON(url);
+    return (data.items || []).map(repo => ({
+      source: 'github',
+      title: `${repo.full_name}`,
+      desc: repo.description || '',
+      url: repo.html_url,
+      score: repo.stargazers_count || 0,
+      commentsCount: 0,
+      author: repo.owner?.login || '',
+      date: new Date(repo.created_at),
+      ts: new Date(repo.created_at).getTime(),
+      tags: repo.topics?.slice(0, 5) || [],
+      language: repo.language,
+    }));
+  } catch (e) { console.error('GitHub:', e); return []; }
+}
+
+async function fetchReddit() {
+  try {
+    // Use Reddit JSON API (no auth needed)
+    const subs = ['artificial', 'MachineLearning', 'LocalLLaMA', 'ChatGPT'];
+    const results = [];
+    for (const sub of subs) {
+      try {
+        const data = await fetchJSON(`https://www.reddit.com/r/${sub}/hot.json?limit=8`);
+        const posts = data?.data?.children || [];
+        for (const p of posts) {
+          const d = p.data;
+          if (d.stickied) continue;
+          results.push({
+            source: 'reddit',
+            title: d.title,
+            desc: d.selftext?.substring(0, 300) || '',
+            url: `https://reddit.com${d.permalink}`,
+            score: d.score || 0,
+            commentsCount: d.num_comments || 0,
+            author: d.author || '',
+            date: new Date((d.created_utc || 0) * 1000),
+            ts: (d.created_utc || 0) * 1000,
+            subreddit: sub,
+          });
+        }
+      } catch {}
+    }
+    return results;
+  } catch (e) { console.error('Reddit:', e); return []; }
+}
+
+// ─── Source Labels ─────────────────────────────────────
+const SOURCE_META = {
+  hn:       { label: 'Hacker News', tag: 'hn', color: '#ff6600' },
+  devto:    { label: 'Dev.to', tag: 'devto', color: '#fff' },
+  arxiv:    { label: 'arXiv', tag: 'arxiv', color: '#009688' },
+  lobsters: { label: 'Lobsters', tag: 'lobsters', color: '#ef5350' },
+  github:   { label: 'GitHub', tag: 'github', color: '#8b949e' },
+  reddit:   { label: 'Reddit', tag: 'reddit', color: '#ff4500' },
+};
+
+// ─── Rendering ────────────────────────────────────────
+function timeAgo(date) {
+  const s = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.floor(s/60)}m ago`;
+  if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+  return `${Math.floor(s/86400)}d ago`;
+}
+
+function renderArticle(a) {
+  const src = SOURCE_META[a.source] || {};
+  const tags = classify(`${a.title} ${a.desc} ${a.tags?.join(' ') || ''}`);
+  const isHighlight = tags.some(t => t.key === 'vibe' || t.key === 'agents');
+
+  let metaHtml = '';
+  if (a.score) metaHtml += `<span>▲ ${a.score.toLocaleString()}</span>`;
+  if (a.commentsCount) metaHtml += `<span>💬 ${a.commentsCount}</span>`;
+  if (a.author) metaHtml += `<span>by ${a.author}</span>`;
+  if (a.language) metaHtml += `<span style="color:var(--accent2)">${a.language}</span>`;
+  if (a.subreddit) metaHtml += `<span>r/${a.subreddit}</span>`;
+
+  const tagsHtml = tags.map(t =>
+    `<span class="tag ${t.key === 'vibe' ? 'vibe' : t.key === 'ai' ? 'ai' : ''}">${t.icon} ${t.label}</span>`
+  ).join('');
+
+  const extraTags = (a.tags || []).slice(0, 3).map(t =>
+    `<span class="tag">${t}</span>`
+  ).join('');
+
+  return `<div class="article ${isHighlight ? 'meta-highlight' : ''}" onclick="window.open('${a.url}', '_blank')">
+    <div class="article-top">
+      <span class="source-tag ${src.tag}">${src.label || a.source}</span>
+      <div class="tag-list">${tagsHtml}${extraTags}</div>
+      <span class="article-date">${timeAgo(a.date)}</span>
+    </div>
+    <div class="article-title">${escHtml(a.title)}</div>
+    ${a.desc ? `<div class="article-desc">${escHtml(a.desc)}</div>` : ''}
+    <div class="article-meta">${metaHtml}</div>
+  </div>`;
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function filterArticles() {
+  let arts = [...state.articles];
+
+  // Source filter
+  if (state.source === 'topic-ai') arts = arts.filter(a => isAIRelated(a));
+  else if (state.source === 'topic-vibe') arts = arts.filter(a => {
+    const text = `${a.title} ${a.desc}`.toLowerCase();
+    return TOPICS.vibe.keywords.some(kw => text.includes(kw));
+  });
+  else if (state.source === 'topic-agents') arts = arts.filter(a => {
+    const text = `${a.title} ${a.desc}`.toLowerCase();
+    return TOPICS.agents.keywords.some(kw => text.includes(kw));
+  });
+  else if (state.source === 'topic-tools') arts = arts.filter(a => {
+    const text = `${a.title} ${a.desc}`.toLowerCase();
+    return TOPICS.tools.keywords.some(kw => text.includes(kw));
+  });
+  else if (state.source === 'topic-models') arts = arts.filter(a => {
+    const text = `${a.title} ${a.desc}`.toLowerCase();
+    return TOPICS.models.keywords.some(kw => text.includes(kw));
+  });
+  else if (state.source !== 'all') arts = arts.filter(a => a.source === state.source);
+
+  // Search
+  if (state.search) {
+    const q = state.search.toLowerCase();
+    arts = arts.filter(a =>
+      a.title.toLowerCase().includes(q) ||
+      a.desc.toLowerCase().includes(q) ||
+      a.author?.toLowerCase().includes(q) ||
+      (a.tags || []).some(t => t.toLowerCase().includes(q))
+    );
+  }
+
+  // Sort
+  switch (state.sort) {
+    case 'hot':
+      arts.sort((a, b) => {
+        // Weighted: score + recency + engagement
+        const ageA = (Date.now() - a.ts) / 3600000; // hours
+        const ageB = (Date.now() - b.ts) / 3600000;
+        const hotA = (a.score + a.commentsCount * 2) / Math.pow(ageA + 2, 1.5);
+        const hotB = (b.score + b.commentsCount * 2) / Math.pow(ageB + 2, 1.5);
+        return hotB - hotA;
+      });
+      break;
+    case 'recent':
+      arts.sort((a, b) => b.ts - a.ts);
+      break;
+    case 'discussed':
+      arts.sort((a, b) => (b.score + b.commentsCount) - (a.score + a.commentsCount));
+      break;
+  }
+
+  return arts;
+}
+
+function renderFeed() {
+  const arts = filterArticles();
+  const container = document.getElementById('feedContent');
+  document.getElementById('articleCount').textContent = arts.length;
+
+  if (arts.length === 0) {
+    container.innerHTML = `<div class="loader"><p>No articles match your filter. Try a different source or search term.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = arts.map(renderArticle).join('');
+}
+
+function updateStats() {
+  const arts = state.articles;
+  document.getElementById('stat-total').textContent = arts.length;
+  document.getElementById('stat-ai').textContent = arts.filter(a => isAIRelated(a)).length;
+  document.getElementById('stat-vibe').textContent = arts.filter(a => {
+    const text = `${a.title} ${a.desc}`.toLowerCase();
+    return TOPICS.vibe.keywords.some(kw => text.includes(kw));
+  }).length;
+  document.getElementById('stat-sources').textContent = `${state.sourcesLoaded}/${state.sourcesTotal}`;
+  document.getElementById('stat-updated').textContent = new Date().toLocaleTimeString();
+
+  // Source counts
+  for (const src of ['hn', 'devto', 'arxiv', 'lobsters', 'github', 'reddit']) {
+    const el = document.getElementById(`count-${src}`);
+    if (el) el.textContent = arts.filter(a => a.source === src).length;
+  }
+  document.getElementById('count-all').textContent = arts.length;
+  document.getElementById('count-topic-ai').textContent = arts.filter(a => isAIRelated(a)).length;
+  document.getElementById('count-topic-vibe').textContent = arts.filter(a => {
+    const text = `${a.title} ${a.desc}`.toLowerCase();
+    return TOPICS.vibe.keywords.some(kw => text.includes(kw));
+  }).length;
+  document.getElementById('count-topic-agents').textContent = arts.filter(a => {
+    const text = `${a.title} ${a.desc}`.toLowerCase();
+    return TOPICS.agents.keywords.some(kw => text.includes(kw));
+  }).length;
+  document.getElementById('count-topic-tools').textContent = arts.filter(a => {
+    const text = `${a.title} ${a.desc}`.toLowerCase();
+    return TOPICS.tools.keywords.some(kw => text.includes(kw));
+  }).length;
+  document.getElementById('count-topic-models').textContent = arts.filter(a => {
+    const text = `${a.title} ${a.desc}`.toLowerCase();
+    return TOPICS.models.keywords.some(kw => text.includes(kw));
+  }).length;
+}
+
+function updateTrending() {
+  const arts = filterArticles().slice(0, 8);
+  const el = document.getElementById('trendingList');
+  el.innerHTML = arts.map(a => `
+    <div class="trending-item" onclick="window.open('${a.url}', '_blank')">
+      <div class="title">${escHtml(a.title.substring(0, 80))}</div>
+      <div class="meta">${SOURCE_META[a.source]?.label || a.source} · ▲${a.score} · ${timeAgo(a.date)}</div>
+    </div>
+  `).join('');
+}
+
+function updateKeywords() {
+  const text = state.articles.map(a => `${a.title} ${a.desc} ${(a.tags||[]).join(' ')}`).join(' ').toLowerCase();
+  const words = text.match(/\b[a-z]{4,}\b/g) || [];
+  const stopWords = new Set(['this', 'that', 'with', 'from', 'have', 'been', 'will', 'your', 'more', 'about', 'into', 'some', 'than', 'them', 'very', 'what', 'when', 'which', 'their', 'there', 'these', 'those', 'would', 'could', 'should']);
+  const freq = {};
+  words.forEach(w => { if (!stopWords.has(w)) freq[w] = (freq[w] || 0) + 1; });
+  const top = Object.entries(freq).sort((a,b) => b[1] - a[1]).slice(0, 20);
+  document.getElementById('keywordCloud').innerHTML = top.map(([w, c]) =>
+    `<span class="keyword" onclick="document.getElementById('globalSearch').value='${w}';handleSearch('${w}')">${w} (${c})</span>`
+  ).join('');
+}
+
+// ─── Event Handlers ───────────────────────────────────
+function setSource(src, el) {
+  state.source = src;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  
+  const titles = {
+    all: 'All Sources', hn: 'Hacker News', devto: 'Dev.to', arxiv: 'arXiv Papers',
+    lobsters: 'Lobsters', github: 'GitHub Trending', reddit: 'Reddit',
+    'topic-ai': '🧠 AI / LLMs', 'topic-vibe': '✨ Vibe Coding',
+    'topic-agents': '🤖 AI Agents', 'topic-tools': '🛠️ Tools & Dev',
+    'topic-models': '⚡ New Models',
+  };
+  document.getElementById('feedTitle').textContent = titles[src] || src;
+  renderFeed();
+  updateTrending();
+}
+
+function setSort(sort, el) {
+  state.sort = sort;
+  document.querySelectorAll('.feed-btn').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  else document.querySelector('.feed-btn')?.classList.add('active');
+  renderFeed();
+  updateTrending();
+}
+
+function handleSearch(val) {
+  state.search = val;
+  renderFeed();
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('mobile-open');
+}
+
+// Keyboard shortcut
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('globalSearch').focus();
+  }
+});
+
+// ─── Main Load ────────────────────────────────────────
+async function refreshAll() {
+  const dot = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+  dot.style.background = 'var(--yellow)';
+  statusText.textContent = 'Fetching...';
+  state.sourcesLoaded = 0;
+
+  const fetchers = [
+    { name: 'hn', fn: fetchHN },
+    { name: 'devto', fn: fetchDevTo },
+    { name: 'arxiv', fn: fetchArxiv },
+    { name: 'lobsters', fn: fetchLobsters },
+    { name: 'github', fn: fetchGitHubTrending },
+    { name: 'reddit', fn: fetchReddit },
+  ];
+
+  // Fetch all sources in parallel
+  const results = await Promise.allSettled(fetchers.map(async (f) => {
+    const data = await f.fn();
+    state.sourcesLoaded++;
+    statusText.textContent = `${state.sourcesLoaded}/${state.sourcesTotal} sources`;
+    return data;
+  }));
+
+  // Merge all articles
+  const allArticles = [];
+  results.forEach(r => {
+    if (r.status === 'fulfilled' && Array.isArray(r.value)) {
+      allArticles.push(...r.value);
+    }
+  });
+
+  // Deduplicate by URL
+  const seen = new Set();
+  state.articles = allArticles.filter(a => {
+    const key = a.url.replace(/\/$/, '');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  dot.style.background = 'var(--green)';
+  statusText.textContent = `Live · ${state.articles.length} articles`;
+
+  updateStats();
+  renderFeed();
+  updateTrending();
+  updateKeywords();
+}
+
+// ─── Init ─────────────────────────────────────────────
+refreshAll();
+setInterval(refreshAll, REFRESH_MS);
+</script>
+</body>
+</html>
